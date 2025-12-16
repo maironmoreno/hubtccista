@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Tccista: Ciência e Acolhimento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            terracotta: '#D66F53',
+                            sage: '#81B29A',
+                            cream: '#FDFBF7',
+                            dark: '#3D405B',
+                            light: '#FFF5F2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #3D405B;
+        }
+
+        /* --- UI Elements --- */
+        .btn-primary {
+            background-color: #D66F53; 
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(214, 111, 83, 0.39);
+        }
+        .btn-primary:hover {
+            background-color: #BF5D42;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(214, 111, 83, 0.23);
+        }
+        
+        .btn-secondary {
+            background-color: #E5E7EB;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background-color: #D1D5DB; }
+
+        .interactive-card {
+            background: #FFFFFF;
+            border: 1px solid #F2EBE0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .interactive-card:hover {
+            border-color: #D66F53;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar-link {
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            color: #6B7280;
+        }
+        .sidebar-link:hover { background-color: #FFF5F2; color: #D66F53; }
+        .sidebar-link.active {
+            background-color: #FFF5F2;
+            border-left-color: #D66F53;
+            color: #D66F53;
+            font-weight: 600;
+        }
+
+        .nav-link { transition: color 0.3s; color: #9CA3AF; }
+        .nav-link.active { color: #D66F53; font-weight: 600; }
+
+        .app-view {
+            display: none;
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .app-view.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- CÍRCULO DE RESPIRAÇÃO --- */
+        .breathing-container {
+            position: relative;
+            width: 240px; height: 240px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        @media (min-width: 768px) { .breathing-container { width: 320px; height: 320px; } }
+
+        .breathing-ring-outer {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(214, 111, 83, 0.1);
+            background-color: rgba(253, 251, 247, 0.5);
+            z-index: 0;
+        }
+
+        .breathing-circle-inner {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            transform: scale(0.4); 
+            background-color: #E5E7EB;
+            opacity: 0.9;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            transition: transform 4s cubic-bezier(0.45, 0.05, 0.55, 0.95), 
+                        background-color 4s ease, 
+                        box-shadow 4s ease;
+        }
+
+        /* FASES DE RESPIRAÇÃO */
+        .phase-inhale {
+            transform: scale(1.0) !important;
+            background-color: #D66F53 !important;
+            box-shadow: 0 15px 40px rgba(214, 111, 83, 0.4) !important;
+        }
+        .phase-hold {
+            transform: scale(1.0) !important;
+            background-color: #D66F53 !important;
+            box-shadow: 0 0 0 15px rgba(214, 111, 83, 0.15) !important;
+            transition: box-shadow 0.5s ease !important; 
+        }
+        .phase-exhale {
+            transform: scale(0.4) !important;
+            background-color: #E5E7EB !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* --- Audio Player Styling --- */
+        audio {
+            width: 100%;
+            height: 32px;
+            margin-top: 8px;
+            border-radius: 8px;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #FDFBF7;
+        }
+        audio::-webkit-media-controls-play-button {
+            background-color: #FFF5F2;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="antialiased h-screen overflow-hidden flex text-brand-dark">
+
+    <aside class="hidden md:flex w-72 flex-col bg-white border-r border-gray-100 z-20">
+        <div class="p-8 border-b border-gray-50">
+            <div class="flex items-center justify-center">
+                <img src="/img/logo-horizontal.png" alt="Hub Tccista Logo" class="w-28 h-12 object-contain">
+            </div>
+        </div>
+        
+        <nav class="flex-grow p-6 space-y-2">
+            <button onclick="navigateTo('home-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4 active" data-view="home-view">
+                <span class="text-lg">🏠</span> Início
+            </button>
+            <button onclick="navigateTo('breathing-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="breathing-view">
+                <span class="text-lg">🌬️</span> Respirar
+            </button>
+            <button onclick="navigateTo('library-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="library-view">
+                <span class="text-lg">📚</span> Biblioteca
+            </button>
+        </nav>
+        <div class="p-6">
+            <div class="bg-brand-light p-4 rounded-xl border border-[#FFE4DD]">
+                <p class="text-xs text-gray-500 font-medium mb-2">Precisa de ajuda profissional?</p>
+                <a href="https://hubtccista.com.br" target="_blank" class="text-xs font-bold text-brand-terracotta hover:underline">Agendar Triagem &rarr;</a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full relative w-full">
+        <header class="md:hidden p-4 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+            <div class="flex items-center justify-center gap-3">
+                <img src="/img/logo-horizontal.png" alt="Hub Tccista Logo" class="w-28 h-12 object-contain">
+            </div>
+        </header>
+
+        <main class="flex-grow overflow-y-auto p-5 md:p-10 lg:p-14 scroll-smooth">
+            <div class="max-w-6xl mx-auto">
+                
+                <div id="home-view" class="app-view active">
+                    <div class="mb-10 text-center md:text-left">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-3 text-gray-800">Olá!</h2>
+                        <p class="text-gray-500 text-lg font-light">Vamos praticar um pouco de autocuidado hoje?</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-light rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#FFE4DD]"></div>
+                            <div class="relative z-10 mb-6">
+                                <div class="w-14 h-14 bg-[#FFF0EB] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-terracotta">🌬️</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Respiração Guiada</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Técnica para reduzir a ansiedade e retomar o controle.</p>
+                            </div>
+                            <button onclick="navigateTo('breathing-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Iniciar Prática</button>
+                        </div>
+                        <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-[#EAF4F0] rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#D8EBE4]"></div>
+                            <div class="relative z-10 mb-6">
+                                <div class="w-14 h-14 bg-[#EAF4F0] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-sage">📚</div>
+                                <h3 class="font-bold text-xl mb-2 text-gray-800">Biblioteca TCC</h3>
+                                <p class="text-sm text-gray-500 leading-relaxed">Conteúdos psicoeducativos e áudios para seu bem-estar.</p>
+                            </div>
+                            <button onclick="navigateTo('library-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Explorar Acervo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="breathing-view" class="app-view">
+                    <div class="flex flex-col items-center justify-center min-h-[60vh] py-10">
+                        <div class="text-center mb-12">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-gray-800">Ciclo de Calma</h2>
+                            <p class="text-gray-500 font-light">Siga o preenchimento do círculo.</p>
+                        </div>
+                        
+                        <div class="breathing-container mb-8">
+                            <div class="breathing-ring-outer"></div>
+                            <div id="breathing-circle-inner" class="breathing-circle-inner"></div>
+                        </div>
+                        
+                        <div class="h-12 flex items-center justify-center">
+                            <p id="breathing-text" class="text-xl md:text-2xl font-semibold text-brand-dark transition-opacity duration-300">Pronto para começar?</p>
+                        </div>
+                        
+                        <div class="mt-10">
+                            <button id="breathing-control-btn" class="btn-primary px-10 py-3 rounded-full text-lg shadow-xl font-semibold flex items-center gap-2">
+                                <span>▶</span> Começar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="library-view" class="app-view">
+                     <header class="mb-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Biblioteca de Áudios</h2>
+                        <p class="text-gray-500">Práticas guiadas para diferentes momentos do seu dia.</p>
+                    </header>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">1</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 01</h3>
+                                <audio controls preload="none"><source src="audios/1Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">2</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 02</h3>
+                                <audio controls preload="none"><source src="audios/2Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">3</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 03</h3>
+                                <audio controls preload="none"><source src="audios/3Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">4</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 04</h3>
+                                <audio controls preload="none"><source src="audios/4Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">5</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 05</h3>
+                                <audio controls preload="none"><source src="audios/5Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">6</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 06</h3>
+                                <audio controls preload="none"><source src="audios/6Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">7</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 07</h3>
+                                <audio controls preload="none"><source src="audios/7Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">8</div>
+                            <div class="flex-grow min-w-0">
+                                <h3 class="font-bold text-gray-700 text-sm truncate">Meditação Guiada 08</h3>
+                                <audio controls preload="none"><source src="audios/8Track.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="md:hidden grid grid-cols-3 border-t border-gray-100 bg-white safe-area-bottom shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-20">
+            <button onclick="navigateTo('home-view')" class="nav-link active p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="home-view">
+                <span class="text-xl mb-1">🏠</span>
+                <span class="font-medium">Início</span>
+            </button>
+            <button onclick="navigateTo('breathing-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="breathing-view">
+                <span class="text-xl mb-1">🌬️</span>
+                <span class="font-medium">Respirar</span>
+            </button>
+            <button onclick="navigateTo('library-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="library-view">
+                <span class="text-xl mb-1">📚</span>
+                <span class="font-medium">Biblioteca</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // --- NAVEGAÇÃO ---
+        const appViews = document.querySelectorAll('.app-view');
+        const allNavLinks = document.querySelectorAll('.nav-link, .sidebar-link'); 
+        
+        function navigateTo(viewId) {
+            appViews.forEach(view => view.classList.toggle('active', view.id === viewId));
+            allNavLinks.forEach(link => {
+                if(link.dataset.view === viewId) link.classList.add('active');
+                else link.classList.remove('active');
+            });
+        }
+
+        // --- CONTROLE DE ÁUDIO EXCLUSIVO ---
+        const allAudios = document.querySelectorAll('audio');
+        allAudios.forEach(audio => {
+            audio.addEventListener('play', (event) => {
+                allAudios.forEach(otherAudio => {
+                    if (otherAudio !== event.target) otherAudio.pause();
+                });
+            });
+        });
+
+        // --- LÓGICA DE RESPIRAÇÃO ---
+        const circleInner = document.getElementById('breathing-circle-inner');
+        const breathingText = document.getElementById('breathing-text');
+        const breathingBtn = document.getElementById('breathing-control-btn');
+        
+        let breathingTimeout;
+        let isBreathing = false;
+
+        const breathingCycle = [
+            { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
+            { text: "Segure o ar...",       duration: 2000, phaseClass: "phase-hold" },
+            { text: "Expire suavemente...", duration: 4000, phaseClass: "phase-exhale" },
+        ];
+
+        function startBreathing() {
+            if(isBreathing) return;
+            isBreathing = true;
+            
+            breathingBtn.innerHTML = `<span>⏹</span> Parar`;
+            breathingBtn.classList.remove('btn-primary');
+            breathingBtn.classList.add('btn-secondary');
+
+            let currentIndex = 0;
+
+            function runStep() {
+                if(!isBreathing) return;
+
+                const step = breathingCycle[currentIndex];
+
+                breathingText.style.opacity = 0;
+                setTimeout(() => {
+                    breathingText.textContent = step.text;
+                    breathingText.style.opacity = 1;
+                }, 150);
+
+                circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale');
+                void circleInner.offsetWidth; 
+                circleInner.classList.add(step.phaseClass);
+
+                currentIndex = (currentIndex + 1) % breathingCycle.length;
+                breathingTimeout = setTimeout(runStep, step.duration);
+            }
+
+            runStep();
+        }
+
+        function stopBreathing() {
+            isBreathing = false;
+            clearTimeout(breathingTimeout);
+            
+            breathingBtn.innerHTML = `<span>▶</span> Começar`;
+            breathingBtn.classList.remove('btn-secondary');
+            breathingBtn.classList.add('btn-primary');
+            
+            circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale');
+            breathingText.textContent = "Pronto para recomeçar?";
+        }
+
+        breathingBtn.addEventListener('click', () => {
+            if (isBreathing) stopBreathing();
+            else startBreathing();
+        });
+    </script>
+</body>
+</html>
