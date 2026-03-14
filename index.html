@@ -253,11 +253,17 @@
                             <p id="breathing-text" class="text-xl md:text-2xl font-semibold text-brand-dark transition-opacity duration-300">Pronto para começar?</p>
                         </div>
                         
-                        <div class="mt-10">
+                        <div class="mt-10 flex items-center justify-center gap-4">
                             <button id="breathing-control-btn" class="btn-primary px-10 py-3 rounded-full text-lg shadow-xl font-semibold flex items-center gap-2">
                                 <span>▶</span> Começar
                             </button>
+                            
+                            <button id="mute-btn" class="w-14 h-14 flex items-center justify-center rounded-full bg-white border border-gray-200 text-2xl text-gray-600 hover:bg-gray-50 transition shadow-sm" title="Ativar/Desativar Som das Fases">
+                                🔊
+                            </button>
                         </div>
+                        
+                        <audio id="chime-audio" src="./audios/sino.mp3" preload="auto"></audio>
                     </div>
                 </div>
 
@@ -362,11 +368,21 @@
         });
 
         // --- LÓGICA DE RESPIRAÇÃO ---
-        
         const circleInner = document.getElementById('breathing-circle-inner');
         const breathingText = document.getElementById('breathing-text');
         const breathingBtn = document.getElementById('breathing-control-btn');
-        const techniqueSelect = document.getElementById('technique-select'); // Novo elemento do menu
+        const techniqueSelect = document.getElementById('technique-select');
+        
+        // NOVAS VARIÁVEIS PARA O SOM:
+        const chimeAudio = document.getElementById('chime-audio');
+        const muteBtn = document.getElementById('mute-btn');
+        let isMuted = false; // O som começa ligado por padrão
+
+        // NOVO: Lógica do botão de Mute
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted; // Inverte o estado (se era falso, vira verdadeiro, e vice-versa)
+            muteBtn.textContent = isMuted ? '🔇' : '🔊'; // Muda o emoji do botão
+        });
         
         let breathingTimeout;
         let isBreathing = false;
@@ -420,8 +436,13 @@
             function runStep() {
                 if(!isBreathing) return;
 
-                // Usa o ciclo atual escolhido no menu
                 const step = currentCycle[currentIndex];
+
+                // Toca o som se não estiver silenciado
+                if (!isMuted) {
+                    chimeAudio.currentTime = 0; 
+                    chimeAudio.play().catch(e => console.log("Áudio bloqueado pelo navegador até o usuário interagir."));
+                }
 
                 breathingText.style.opacity = 0;
                 setTimeout(() => {
@@ -439,8 +460,10 @@
                 breathingTimeout = setTimeout(runStep, step.duration);
             }
 
-            runStep();
+            // O SEGREDO ESTÁ AQUI: Nós precisamos de chamar a função para ela dar o primeiro passo!
+            runStep(); 
         }
+
 
         function stopBreathing() {
             isBreathing = false;
