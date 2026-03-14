@@ -139,6 +139,13 @@
             background-color: #E5E7EB !important;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05) !important;
         }
+    
+        .phase-hold-empty {
+            transform: scale(0.4) !important;
+            background-color: #E5E7EB !important;
+            box-shadow: 0 0 0 15px rgba(229, 231, 235, 0.6) !important;
+            transition: box-shadow 0.5s ease !important; 
+        }
 
         /* --- Audio Player Styling --- */
         audio {
@@ -222,11 +229,19 @@
                     </div>
                 </div>
 
-                <div id="breathing-view" class="app-view">
+              <div id="breathing-view" class="app-view">
                     <div class="flex flex-col items-center justify-center min-h-[60vh] py-10">
-                        <div class="text-center mb-12">
+                        <div class="text-center mb-6">
                             <h2 class="text-2xl md:text-3xl font-bold mb-2 text-gray-800">Ciclo de Calma</h2>
                             <p class="text-gray-500 font-light">Siga o preenchimento do círculo.</p>
+                        </div>
+                        
+                        <div class="mb-10 z-20 relative">
+                            <select id="technique-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center">
+                                <option value="calm">Técnica 4-2-4 (Calma)</option>
+                                <option value="sleep">Técnica 4-7-8 (Sono Profundo)</option>
+                                <option value="box">Técnica em Caixa (Foco)</option>
+                            </select>
                         </div>
                         
                         <div class="breathing-container mb-8">
@@ -347,22 +362,54 @@
         });
 
         // --- LÓGICA DE RESPIRAÇÃO ---
+        
         const circleInner = document.getElementById('breathing-circle-inner');
         const breathingText = document.getElementById('breathing-text');
         const breathingBtn = document.getElementById('breathing-control-btn');
+        const techniqueSelect = document.getElementById('technique-select'); // Novo elemento do menu
         
         let breathingTimeout;
         let isBreathing = false;
 
-        const breathingCycle = [
-            { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
-            { text: "Segure o ar...",       duration: 2000, phaseClass: "phase-hold" },
-            { text: "Expire suavemente...", duration: 4000, phaseClass: "phase-exhale" },
-        ];
+        // NOVO: Dicionário com todas as técnicas e os seus passos
+        const breathingTechniques = {
+            calm: [
+                { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
+                { text: "Segure o ar...",       duration: 2000, phaseClass: "phase-hold" },
+                { text: "Expire suavemente...", duration: 4000, phaseClass: "phase-exhale" },
+            ],
+            sleep: [
+                { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
+                { text: "Segure o ar...",       duration: 7000, phaseClass: "phase-hold" },
+                { text: "Expire suavemente...", duration: 8000, phaseClass: "phase-exhale" },
+            ],
+            box: [
+                { text: "Inspire...",           duration: 4000, phaseClass: "phase-inhale" },
+                { text: "Segure o ar...",       duration: 4000, phaseClass: "phase-hold" },
+                { text: "Expire...",            duration: 4000, phaseClass: "phase-exhale" },
+                { text: "Mantenha vazio...",    duration: 4000, phaseClass: "phase-hold-empty" }, // Nova fase que criámos!
+            ]
+        };
+
+        // Começamos com a técnica de calma por padrão
+        let currentCycle = breathingTechniques['calm'];
+
+        // NOVO: Detetar quando o utilizador muda o menu
+        techniqueSelect.addEventListener('change', (evento) => {
+            const tecnicaEscolhida = evento.target.value;
+            currentCycle = breathingTechniques[tecnicaEscolhida]; // Atualiza o ciclo
+            
+            // Se o utilizador mudar de técnica enquanto respira, paramos para não bugar
+            if(isBreathing) {
+                stopBreathing();
+            }
+        });
 
         function startBreathing() {
             if(isBreathing) return;
             isBreathing = true;
+            techniqueSelect.disabled = true; // Impede mudar de técnica enquanto decorre
+            techniqueSelect.classList.add('opacity-50', 'cursor-not-allowed');
             
             breathingBtn.innerHTML = `<span>⏹</span> Parar`;
             breathingBtn.classList.remove('btn-primary');
@@ -373,7 +420,8 @@
             function runStep() {
                 if(!isBreathing) return;
 
-                const step = breathingCycle[currentIndex];
+                // Usa o ciclo atual escolhido no menu
+                const step = currentCycle[currentIndex];
 
                 breathingText.style.opacity = 0;
                 setTimeout(() => {
@@ -381,11 +429,13 @@
                     breathingText.style.opacity = 1;
                 }, 150);
 
-                circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale');
+                // Limpa todas as fases possíveis antes de aplicar a nova
+                circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
                 void circleInner.offsetWidth; 
                 circleInner.classList.add(step.phaseClass);
 
-                currentIndex = (currentIndex + 1) % breathingCycle.length;
+                currentIndex = (currentIndex + 1) % currentCycle.length;
+                
                 breathingTimeout = setTimeout(runStep, step.duration);
             }
 
@@ -396,12 +446,18 @@
             isBreathing = false;
             clearTimeout(breathingTimeout);
             
+            // Volta a ativar o menu
+            techniqueSelect.disabled = false;
+            techniqueSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+            
             breathingBtn.innerHTML = `<span>▶</span> Começar`;
             breathingBtn.classList.remove('btn-secondary');
             breathingBtn.classList.add('btn-primary');
             
-            circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale');
+            // Limpa todas as fases
+            circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
             breathingText.textContent = "Pronto para recomeçar?";
+            breathingText.style.opacity = 1; 
         }
 
         breathingBtn.addEventListener('click', () => {
