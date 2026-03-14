@@ -236,11 +236,25 @@
                             <p class="text-gray-500 font-light">Siga o preenchimento do círculo.</p>
                         </div>
                         
-                        <div class="mb-10 z-20 relative">
-                            <select id="technique-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center">
+                        <div class="mb-10 z-20 relative flex flex-col md:flex-row gap-4 items-center justify-center">
+                            <select id="technique-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
                                 <option value="calm">Técnica 4-2-4 (Calma)</option>
                                 <option value="sleep">Técnica 4-7-8 (Sono Profundo)</option>
                                 <option value="box">Técnica em Caixa (Foco)</option>
+                            </select>
+
+                            <select id="time-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
+                                <option value="0">Livre (Sem Limite)</option>
+                                <option value="60">1 Minuto</option>
+                                <option value="120">2 Minutos</option>
+                                <option value="180">3 Minutos</option>
+                                <option value="240">4 Minutos</option>
+                                <option value="300" selected>5 Minutos</option> 
+                                <option value="360">6 Minutos</option>
+                                <option value="420">7 Minutos</option>
+                                <option value="480">8 Minutos</option>
+                                <option value="540">9 Minutos</option>
+                                <option value="600">10 Minutos</option>
                             </select>
                         </div>
                         
@@ -249,7 +263,7 @@
                             <div id="breathing-circle-inner" class="breathing-circle-inner"></div>
                         </div>
                         
-                        <div class="h-12 flex items-center justify-center">
+                        <div class="h-16 flex flex-col items-center justify-center">
                             <p id="breathing-text" class="text-xl md:text-2xl font-semibold text-brand-dark transition-opacity duration-300">Pronto para começar?</p>
                         </div>
                         
@@ -355,6 +369,11 @@
                 if(link.dataset.view === viewId) link.classList.add('active');
                 else link.classList.remove('active');
             });
+
+            // Parar respiração se sair da página
+            if (viewId !== 'breathing-view' && isBreathing) {
+                stopBreathing();
+            }
         }
 
         // --- CONTROLE DE ÁUDIO EXCLUSIVO ---
@@ -362,7 +381,7 @@
         allAudios.forEach(audio => {
             audio.addEventListener('play', (event) => {
                 allAudios.forEach(otherAudio => {
-                    if (otherAudio !== event.target) otherAudio.pause();
+                    if (otherAudio !== event.target && otherAudio.id !== 'chime-audio') otherAudio.pause();
                 });
             });
         });
@@ -373,21 +392,24 @@
         const breathingBtn = document.getElementById('breathing-control-btn');
         const techniqueSelect = document.getElementById('technique-select');
         
-        // NOVAS VARIÁVEIS PARA O SOM:
+        // ELEMENTOS DO SOM:
         const chimeAudio = document.getElementById('chime-audio');
         const muteBtn = document.getElementById('mute-btn');
-        let isMuted = false; // O som começa ligado por padrão
+        let isMuted = false; 
 
-        // NOVO: Lógica do botão de Mute
+        // ELEMENTO DO TIMER:
+        const timeSelect = document.getElementById('time-select');
+        let countdownInterval; // O "relógio" que vai contar os segundos nos bastidores
+        let remainingSeconds = 0; 
+
         muteBtn.addEventListener('click', () => {
-            isMuted = !isMuted; // Inverte o estado (se era falso, vira verdadeiro, e vice-versa)
-            muteBtn.textContent = isMuted ? '🔇' : '🔊'; // Muda o emoji do botão
+            isMuted = !isMuted; 
+            muteBtn.textContent = isMuted ? '🔇' : '🔊'; 
         });
         
         let breathingTimeout;
         let isBreathing = false;
 
-        // NOVO: Dicionário com todas as técnicas e os seus passos
         const breathingTechniques = {
             calm: [
                 { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
@@ -403,33 +425,47 @@
                 { text: "Inspire...",           duration: 4000, phaseClass: "phase-inhale" },
                 { text: "Segure o ar...",       duration: 4000, phaseClass: "phase-hold" },
                 { text: "Expire...",            duration: 4000, phaseClass: "phase-exhale" },
-                { text: "Mantenha vazio...",    duration: 4000, phaseClass: "phase-hold-empty" }, // Nova fase que criámos!
+                { text: "Mantenha vazio...",    duration: 4000, phaseClass: "phase-hold-empty" }, 
             ]
         };
 
-        // Começamos com a técnica de calma por padrão
         let currentCycle = breathingTechniques['calm'];
 
-        // NOVO: Detetar quando o utilizador muda o menu
         techniqueSelect.addEventListener('change', (evento) => {
-            const tecnicaEscolhida = evento.target.value;
-            currentCycle = breathingTechniques[tecnicaEscolhida]; // Atualiza o ciclo
-            
-            // Se o utilizador mudar de técnica enquanto respira, paramos para não bugar
-            if(isBreathing) {
-                stopBreathing();
-            }
+            currentCycle = breathingTechniques[evento.target.value]; 
+            if(isBreathing) stopBreathing();
         });
 
         function startBreathing() {
             if(isBreathing) return;
             isBreathing = true;
-            techniqueSelect.disabled = true; // Impede mudar de técnica enquanto decorre
+            
+            // Bloqueia os dois menus para evitar bugs durante a execução
+            techniqueSelect.disabled = true; 
             techniqueSelect.classList.add('opacity-50', 'cursor-not-allowed');
+            timeSelect.disabled = true; 
+            timeSelect.classList.add('opacity-50', 'cursor-not-allowed');
             
             breathingBtn.innerHTML = `<span>⏹</span> Parar`;
             breathingBtn.classList.remove('btn-primary');
             breathingBtn.classList.add('btn-secondary');
+
+            // LÓGICA DO TIMER INVISÍVEL
+            const selectedTime = parseInt(timeSelect.value); // Pega os segundos escolhidos no menu
+            
+            if (selectedTime > 0) {
+                remainingSeconds = selectedTime;
+
+                // Inicia o cronómetro que corre a cada 1000ms (1 segundo) em silêncio
+                countdownInterval = setInterval(() => {
+                    remainingSeconds--; // Tira 1 segundo da memória
+
+                    // Se chegar a zero, paramos a respiração automaticamente!
+                    if (remainingSeconds <= 0) {
+                        stopBreathing();
+                    }
+                }, 1000);
+            }
 
             let currentIndex = 0;
 
@@ -438,10 +474,9 @@
 
                 const step = currentCycle[currentIndex];
 
-                // Toca o som se não estiver silenciado
                 if (!isMuted) {
                     chimeAudio.currentTime = 0; 
-                    chimeAudio.play().catch(e => console.log("Áudio bloqueado pelo navegador até o usuário interagir."));
+                    chimeAudio.play().catch(e => console.log("Áudio bloqueado."));
                 }
 
                 breathingText.style.opacity = 0;
@@ -450,7 +485,6 @@
                     breathingText.style.opacity = 1;
                 }, 150);
 
-                // Limpa todas as fases possíveis antes de aplicar a nova
                 circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
                 void circleInner.offsetWidth; 
                 circleInner.classList.add(step.phaseClass);
@@ -460,24 +494,26 @@
                 breathingTimeout = setTimeout(runStep, step.duration);
             }
 
-            // O SEGREDO ESTÁ AQUI: Nós precisamos de chamar a função para ela dar o primeiro passo!
             runStep(); 
         }
-
 
         function stopBreathing() {
             isBreathing = false;
             clearTimeout(breathingTimeout);
             
-            // Volta a ativar o menu
+            // Pára o relógio invisível se ele estiver a correr
+            clearInterval(countdownInterval);
+            
+            // Volta a ativar os menus
             techniqueSelect.disabled = false;
             techniqueSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+            timeSelect.disabled = false;
+            timeSelect.classList.remove('opacity-50', 'cursor-not-allowed');
             
             breathingBtn.innerHTML = `<span>▶</span> Começar`;
             breathingBtn.classList.remove('btn-secondary');
             breathingBtn.classList.add('btn-primary');
             
-            // Limpa todas as fases
             circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
             breathingText.textContent = "Pronto para recomeçar?";
             breathingText.style.opacity = 1; 
