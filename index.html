@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hub Tccista: Ciência e Acolhimento</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,14 +29,17 @@
         }
     </script>
     <style>
-        body {
+        html, body {
             background-color: #FDFBF7;
             color: #3D405B;
+            max-width: 100vw;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- UI Elements --- */
         .btn-primary {
-            background-color: #D66F53; 
+            background-color: #D66F53;
             color: #FFFFFF;
             transition: all 0.3s ease;
             box-shadow: 0 4px 14px 0 rgba(214, 111, 83, 0.39);
@@ -46,7 +49,7 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(214, 111, 83, 0.23);
         }
-        
+
         .btn-secondary {
             background-color: #E5E7EB;
             color: #374151;
@@ -86,7 +89,7 @@
             animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .app-view.active { display: block; }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -95,8 +98,9 @@
         /* --- CÍRCULO DE RESPIRAÇÃO --- */
         .breathing-container {
             position: relative;
-            width: 240px; height: 240px;
+            width: 220px; height: 220px;
             display: flex; justify-content: center; align-items: center;
+            margin: 0 auto;
         }
         @media (min-width: 768px) { .breathing-container { width: 320px; height: 320px; } }
 
@@ -112,13 +116,13 @@
         .breathing-circle-inner {
             width: 100%; height: 100%;
             border-radius: 50%;
-            transform: scale(0.4); 
+            transform: scale(0.4);
             background-color: #E5E7EB;
             opacity: 0.9;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             z-index: 10;
-            transition: transform 4s cubic-bezier(0.45, 0.05, 0.55, 0.95), 
-                        background-color 4s ease, 
+            transition: transform 4s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+                        background-color 4s ease,
                         box-shadow 4s ease;
         }
 
@@ -132,19 +136,19 @@
             transform: scale(1.0) !important;
             background-color: #D66F53 !important;
             box-shadow: 0 0 0 15px rgba(214, 111, 83, 0.15) !important;
-            transition: box-shadow 0.5s ease !important; 
+            transition: box-shadow 0.5s ease !important;
         }
         .phase-exhale {
             transform: scale(0.4) !important;
             background-color: #E5E7EB !important;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05) !important;
         }
-    
+
         .phase-hold-empty {
             transform: scale(0.4) !important;
             background-color: #E5E7EB !important;
             box-shadow: 0 0 0 15px rgba(229, 231, 235, 0.6) !important;
-            transition: box-shadow 0.5s ease !important; 
+            transition: box-shadow 0.5s ease !important;
         }
 
         /* --- Audio Player Styling --- */
@@ -165,366 +169,354 @@
 </head>
 <body class="antialiased h-screen overflow-hidden flex text-brand-dark">
 
-    <aside class="hidden md:flex w-72 flex-col bg-white border-r border-gray-100 z-20">
-        <div class="p-8 border-b border-gray-50">
-            <div class="flex items-center justify-center">
-                <img src="./img/logo-horizontal.png" alt="Hub Tccista Logo" width="112" height="48" class="w-28 h-12 object-contain">
-            </div>
+<aside class="hidden md:flex w-72 flex-col bg-white border-r border-gray-100 z-20">
+    <div class="p-8 border-b border-gray-50">
+        <div class="flex items-center justify-center">
+            <img src="./img/logo-horizontal.png" alt="Hub Tccista Logo" width="112" height="48" class="w-28 h-12 object-contain">
         </div>
-        
-        <nav class="flex-grow p-6 space-y-2">
-            <button onclick="navigateTo('home-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4 active" data-view="home-view">
-                <span class="text-lg">🏠</span> Início
-            </button>
-            <button onclick="navigateTo('breathing-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="breathing-view">
-                <span class="text-lg">🌬️</span> Respirar
-            </button>
-            <button onclick="navigateTo('library-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="library-view">
-                <span class="text-lg">📚</span> Biblioteca
-            </button>
-        </nav>
-        <div class="p-6">
-            <div class="bg-brand-light p-4 rounded-xl border border-[#FFE4DD]">
-                <p class="text-xs text-gray-500 font-medium mb-2">Precisa de ajuda profissional?</p>
-                <a href="https://hubtccista.com.br" target="_blank" class="text-xs font-bold text-brand-terracotta hover:underline">Agendar Triagem &rarr;</a>
-            </div>
+    </div>
+
+    <nav class="flex-grow p-6 space-y-2">
+        <button onclick="navigateTo('home-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4 active" data-view="home-view">
+            <span class="text-lg">🏠</span> Início
+        </button>
+        <button onclick="navigateTo('breathing-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="breathing-view">
+            <span class="text-lg">🌬️</span> Respirar
+        </button>
+        <button onclick="navigateTo('library-view')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg flex items-center gap-4" data-view="library-view">
+            <span class="text-lg">📚</span> Biblioteca
+        </button>
+    </nav>
+    <div class="p-6">
+        <div class="bg-brand-light p-4 rounded-xl border border-[#FFE4DD]">
+            <p class="text-xs text-gray-500 font-medium mb-2">Precisa de ajuda profissional?</p>
+            <a href="https://hubtccista.com.br" target="_blank" class="text-xs font-bold text-brand-terracotta hover:underline">Agendar Triagem &rarr;</a>
         </div>
-    </aside>
+    </div>
+</aside>
 
-    <div class="flex-1 flex flex-col h-full relative w-full">
-        <header class="md:hidden p-4 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-            <div class="flex items-center justify-center gap-3">
-                <img src="./img/logo-horizontal.png" alt="Hub Tccista Logo" class="w-28 h-12 object-contain">
-            </div>
-        </header>
+<div class="flex-1 flex flex-col h-full relative w-full overflow-hidden">
 
-        <main class="flex-grow overflow-y-auto p-5 md:p-10 lg:p-14 scroll-smooth">
-            <div class="max-w-6xl mx-auto">
-                
-                <div id="home-view" class="app-view active">
-                    <div class="mb-10 text-center md:text-left">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-3 text-gray-800">Olá!</h2>
-                        <p class="text-gray-500 text-lg font-light">Vamos praticar um pouco de autocuidado hoje?</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-light rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#FFE4DD]"></div>
-                            <div class="relative z-10 mb-6">
-                                <div class="w-14 h-14 bg-[#FFF0EB] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-terracotta">🌬️</div>
-                                <h3 class="font-bold text-xl mb-2 text-gray-800">Respiração Guiada</h3>
-                                <p class="text-sm text-gray-500 leading-relaxed">Técnica para reduzir a ansiedade e retomar o controle.</p>
-                            </div>
-                            <button onclick="navigateTo('breathing-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Iniciar Prática</button>
-                        </div>
-                        <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-[#EAF4F0] rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#D8EBE4]"></div>
-                            <div class="relative z-10 mb-6">
-                                <div class="w-14 h-14 bg-[#EAF4F0] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-sage">📚</div>
-                                <h3 class="font-bold text-xl mb-2 text-gray-800">Biblioteca TCC</h3>
-                                <p class="text-sm text-gray-500 leading-relaxed">Conteúdos psicoeducativos e áudios para seu bem-estar.</p>
-                            </div>
-                            <button onclick="navigateTo('library-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Explorar Acervo</button>
-                        </div>
-                    </div>
-                </div>
-
-              <div id="breathing-view" class="app-view">
-                    <div class="flex flex-col items-center justify-center min-h-[60vh] py-10">
-                        <div class="text-center mb-6">
-                            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-gray-800">Ciclo de Calma</h2>
-                            <p class="text-gray-500 font-light">Siga o preenchimento do círculo.</p>
-                        </div>
-                        
-                        <div class="mb-10 z-20 relative flex flex-col md:flex-row gap-4 items-center justify-center">
-                            <select id="technique-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
-                                <option value=""selected>Escolha a técnica</option>
-                                <option value="calm">Técnica 4-2-4 (Calma)</option>
-                                <option value="sleep">Técnica 4-7-8 (Sono Profundo)</option>
-                                <option value="box">Técnica em Caixa (Foco)</option>
-                            </select>
-
-                            <select id="time-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
-                                <option value="" selected>Escolha o tempo de prática</option>
-                                <option value="0">Livre (Sem Limite)</option>
-                                <option value="60">1 Minuto</option>
-                                <option value="120">2 Minutos</option>
-                                <option value="180">3 Minutos</option>
-                                <option value="240">4 Minutos</option>
-                                <option value="300">5 Minutos</option> 
-                                <option value="360">6 Minutos</option>
-                                <option value="420">7 Minutos</option>
-                                <option value="480">8 Minutos</option>
-                                <option value="540">9 Minutos</option>
-                                <option value="600">10 Minutos</option>
-                            </select>
-                        </div>
-                        
-                        <div class="breathing-container mb-8">
-                            <div class="breathing-ring-outer"></div>
-                            <div id="breathing-circle-inner" class="breathing-circle-inner"></div>
-                        </div>
-                        
-                        <div class="h-16 flex flex-col items-center justify-center">
-                            <p id="breathing-text" class="text-xl md:text-2xl font-semibold text-brand-dark transition-opacity duration-300">Pronto para começar?</p>
-                        </div>
-                        
-                        <div class="mt-10 flex items-center justify-center gap-4">
-                            <button id="breathing-control-btn" class="btn-primary px-10 py-3 rounded-full text-lg shadow-xl font-semibold flex items-center gap-2">
-                                <span>▶</span> Começar
-                            </button>
-                            
-                            <button id="mute-btn" class="w-14 h-14 flex items-center justify-center rounded-full bg-white border border-gray-200 text-2xl text-gray-600 hover:bg-gray-50 transition shadow-sm" title="Ativar/Desativar Som das Fases">
-                                🔊
-                            </button>
-                        </div>
-                        
-                        <audio id="chime-audio" src="./audios/sino.mp3" preload="auto"></audio>
-                    </div>
-                </div>
-
-                <div id="library-view" class="app-view">
-     <header class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2">Biblioteca de Áudios</h2>
-        <p class="text-gray-500">Práticas guiadas para diferentes momentos do seu dia.</p>
+    <header class="md:hidden p-4 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+        <div class="flex items-center justify-center gap-3">
+            <img src="./img/logo-horizontal.png" alt="Hub Tccista Logo" class="w-28 h-12 object-contain">
+        </div>
     </header>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">1</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Orientação à Postura</h3>
-                <audio controls preload="none"><source src="audios/orientacao_a_postura.m4a" type="audio/mp4"></audio>
+
+    <main class="flex-grow overflow-y-auto p-5 md:p-10 lg:p-14 scroll-smooth">
+        <div class="max-w-6xl mx-auto pb-20 md:pb-0">
+
+            <div id="home-view" class="app-view active">
+                <div class="mb-10 text-center md:text-left">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-3 text-gray-800">Olá!</h2>
+                    <p class="text-gray-500 text-lg font-light">Vamos praticar um pouco de autocuidado hoje?</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-light rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#FFE4DD]"></div>
+                        <div class="relative z-10 mb-6">
+                            <div class="w-14 h-14 bg-[#FFF0EB] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-terracotta">🌬️</div>
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Respiração Guiada</h3>
+                            <p class="text-sm text-gray-500 leading-relaxed">Técnica para reduzir a ansiedade e retomar o controle.</p>
+                        </div>
+                        <button onclick="navigateTo('breathing-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Iniciar Prática</button>
+                    </div>
+                    <div class="interactive-card p-6 rounded-2xl flex flex-col justify-between h-full relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-[#EAF4F0] rounded-bl-full -mr-8 -mt-8 transition group-hover:bg-[#D8EBE4]"></div>
+                        <div class="relative z-10 mb-6">
+                            <div class="w-14 h-14 bg-[#EAF4F0] rounded-2xl flex items-center justify-center text-2xl mb-4 text-brand-sage">📚</div>
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Biblioteca TCC</h3>
+                            <p class="text-sm text-gray-500 leading-relaxed">Conteúdos psicoeducativos e áudios para seu bem-estar.</p>
+                        </div>
+                        <button onclick="navigateTo('library-view')" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold relative z-10">Explorar Acervo</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="breathing-view" class="app-view">
+                <div class="flex flex-col items-center justify-center min-h-[60vh] py-10">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2 text-gray-800">Ciclo de Calma</h2>
+                        <p class="text-gray-500 font-light">Siga o preenchimento do círculo.</p>
+                    </div>
+
+                    <div class="mb-10 z-20 relative flex flex-col w-full px-4 gap-4 items-center justify-center">
+                        <select id="technique-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
+                            <option value="" selected>Escolha a técnica</option>
+                            <option value="calm">Técnica 4-2-4 (Calma)</option>
+                            <option value="sleep">Técnica 4-7-8 (Sono Profundo)</option>
+                            <option value="box">Técnica em Caixa (Foco)</option>
+                        </select>
+
+                        <select id="time-select" class="appearance-none bg-white border border-[#F2EBE0] text-gray-700 py-3 px-6 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta focus:border-transparent transition font-medium cursor-pointer text-center w-full md:w-auto">
+                            <option value="" selected>Tempo de prática</option>
+                            <option value="0">Livre (Sem Limite)</option>
+                            <option value="60">1 Minuto</option>
+                            <option value="120">2 Minutos</option>
+                            <option value="180">3 Minutos</option>
+                            <option value="300">5 Minutos</option>
+                            <option value="600">10 Minutos</option>
+                        </select>
+                    </div>
+
+                    <div class="breathing-container mb-8">
+                        <div class="breathing-ring-outer"></div>
+                        <div id="breathing-circle-inner" class="breathing-circle-inner"></div>
+                    </div>
+
+                    <div class="h-16 flex flex-col items-center justify-center text-center px-4">
+                        <p id="breathing-text" class="text-xl md:text-2xl font-semibold text-brand-dark transition-opacity duration-300">Pronto para começar?</p>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-center gap-4">
+                        <button id="breathing-control-btn" class="btn-primary px-10 py-3 rounded-full text-lg shadow-xl font-semibold flex items-center gap-2">
+                            <span>▶</span> Começar
+                        </button>
+
+                        <button id="mute-btn" class="w-14 h-14 flex items-center justify-center rounded-full bg-white border border-gray-200 text-2xl text-gray-600 hover:bg-gray-50 transition shadow-sm" title="Som">
+                            🔊
+                        </button>
+                    </div>
+
+                    <audio id="chime-audio" src="./audios/sino.mp3" preload="auto"></audio>
+                </div>
+            </div>
+
+            <div id="library-view" class="app-view">
+                <header class="mb-8 text-center md:text-left">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Biblioteca de Áudios</h2>
+                    <p class="text-gray-500">Práticas guiadas para o seu dia.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">1</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Orientação à Postura</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/orientacao_a_postura.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">2</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Estou Onde Estou</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/estou_onde_estou.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">3</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Respiração e Corpo</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/respiracao_e_corpo.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">4</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Sons e Pensamentos</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/sons_e_pensamentos.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">5</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Três Etapas</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/tres_etapas.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex flex-col md:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">6</div>
+                            <h3 class="font-bold text-gray-700 text-sm truncate flex-grow">Body Scan</h3>
+                        </div>
+                        <audio controls preload="none" class="w-full md:w-auto mt-2 md:mt-0"><source src="audios/body_scan.m4a" type="audio/mp4"></audio>
+                    </div>
+
+                </div>
             </div>
         </div>
+    </main>
 
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">2</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Estou Onde Estou</h3>
-                <audio controls preload="none"><source src="audios/estou_onde_estou.m4a" type="audio/mp4"></audio>
-            </div>
-        </div>
-
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">3</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Respiração e Corpo</h3>
-                <audio controls preload="none"><source src="audios/respiracao_e_corpo.m4a" type="audio/mp4"></audio>
-            </div>
-        </div>
-
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">4</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Sons e Pensamentos</h3>
-                <audio controls preload="none"><source src="audios/sons_e_pensamentos.m4a" type="audio/mp4"></audio>
-            </div>
-        </div>
-
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#FFF0EB] flex items-center justify-center text-brand-terracotta text-lg shrink-0">5</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Três Etapas</h3>
-                <audio controls preload="none"><source src="audios/tres_etapas.m4a" type="audio/mp4"></audio>
-            </div>
-        </div>
-
-        <div class="interactive-card p-4 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#EAF4F0] flex items-center justify-center text-brand-sage text-lg shrink-0">6</div>
-            <div class="flex-grow min-w-0">
-                <h3 class="font-bold text-gray-700 text-sm truncate">Body Scan</h3>
-                <audio controls preload="none"><source src="audios/body_scan.m4a" type="audio/mp4"></audio>
-            </div>
-        </div>
-
-    </div>
+    <nav class="md:hidden grid grid-cols-3 border-t border-gray-100 bg-white absolute bottom-0 w-full shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-30 pb-2">
+        <button onclick="navigateTo('home-view')" class="nav-link active p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="home-view">
+            <span class="text-xl mb-1">🏠</span>
+            <span class="font-medium">Início</span>
+        </button>
+        <button onclick="navigateTo('breathing-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="breathing-view">
+            <span class="text-xl mb-1">🌬️</span>
+            <span class="font-medium">Respirar</span>
+        </button>
+        <button onclick="navigateTo('library-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="library-view">
+            <span class="text-xl mb-1">📚</span>
+            <span class="font-medium">Biblioteca</span>
+        </button>
+    </nav>
 </div>
-            </div>
-        </main>
 
-        <nav class="md:hidden grid grid-cols-3 border-t border-gray-100 bg-white safe-area-bottom shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-20">
-            <button onclick="navigateTo('home-view')" class="nav-link active p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="home-view">
-                <span class="text-xl mb-1">🏠</span>
-                <span class="font-medium">Início</span>
-            </button>
-            <button onclick="navigateTo('breathing-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="breathing-view">
-                <span class="text-xl mb-1">🌬️</span>
-                <span class="font-medium">Respirar</span>
-            </button>
-            <button onclick="navigateTo('library-view')" class="nav-link p-3 text-center text-xs flex flex-col items-center justify-center gap-1" data-view="library-view">
-                <span class="text-xl mb-1">📚</span>
-                <span class="font-medium">Biblioteca</span>
-            </button>
-        </nav>
-    </div>
+<script>
+    const appViews = document.querySelectorAll('.app-view');
+    const allNavLinks = document.querySelectorAll('.nav-link, .sidebar-link');
 
-    <script>
-        // --- NAVEGAÇÃO ---
-        const appViews = document.querySelectorAll('.app-view');
-        const allNavLinks = document.querySelectorAll('.nav-link, .sidebar-link'); 
-        
-        function navigateTo(viewId) {
-            appViews.forEach(view => view.classList.toggle('active', view.id === viewId));
-            allNavLinks.forEach(link => {
-                if(link.dataset.view === viewId) link.classList.add('active');
-                else link.classList.remove('active');
-            });
+    function navigateTo(viewId) {
+        appViews.forEach(view => view.classList.toggle('active', view.id === viewId));
+        allNavLinks.forEach(link => {
+            if(link.dataset.view === viewId) link.classList.add('active');
+            else link.classList.remove('active');
+        });
 
-            // Parar respiração se sair da página
-            if (viewId !== 'breathing-view' && isBreathing) {
-                stopBreathing();
-            }
+        if (viewId !== 'breathing-view' && isBreathing) {
+            stopBreathing(false); // ATUALIZAÇÃO: Se navegar para fora, para sem tocar o sino
         }
+    }
 
-        // --- CONTROLE DE ÁUDIO EXCLUSIVO ---
-        const allAudios = document.querySelectorAll('audio');
-        allAudios.forEach(audio => {
-            audio.addEventListener('play', (event) => {
-                allAudios.forEach(otherAudio => {
-                    if (otherAudio !== event.target && otherAudio.id !== 'chime-audio') otherAudio.pause();
-                });
+    const allAudios = document.querySelectorAll('audio');
+    allAudios.forEach(audio => {
+        audio.addEventListener('play', (event) => {
+            allAudios.forEach(otherAudio => {
+                if (otherAudio !== event.target && otherAudio.id !== 'chime-audio') otherAudio.pause();
             });
         });
+    });
 
-        // --- LÓGICA DE RESPIRAÇÃO ---
-        const circleInner = document.getElementById('breathing-circle-inner');
-        const breathingText = document.getElementById('breathing-text');
-        const breathingBtn = document.getElementById('breathing-control-btn');
-        const techniqueSelect = document.getElementById('technique-select');
-        
-        // ELEMENTOS DO SOM:
-        const chimeAudio = document.getElementById('chime-audio');
-        const muteBtn = document.getElementById('mute-btn');
-        let isMuted = false; 
+    const circleInner = document.getElementById('breathing-circle-inner');
+    const breathingText = document.getElementById('breathing-text');
+    const breathingBtn = document.getElementById('breathing-control-btn');
+    const techniqueSelect = document.getElementById('technique-select');
+    const chimeAudio = document.getElementById('chime-audio');
+    const muteBtn = document.getElementById('mute-btn');
+    let isMuted = false;
 
-        // ELEMENTO DO TIMER:
-        const timeSelect = document.getElementById('time-select');
-        let countdownInterval; // O "relógio" que vai contar os segundos nos bastidores
-        let remainingSeconds = 0; 
+    const timeSelect = document.getElementById('time-select');
+    let countdownInterval;
+    let remainingSeconds = 0;
 
-        muteBtn.addEventListener('click', () => {
-            isMuted = !isMuted; 
-            muteBtn.textContent = isMuted ? '🔇' : '🔊'; 
-        });
-        
-        let breathingTimeout;
-        let isBreathing = false;
+    muteBtn.addEventListener('click', () => {
+        isMuted = !isMuted;
+        muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    });
 
-        const breathingTechniques = {
-            calm: [
-                { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
-                { text: "Segure o ar...",       duration: 2000, phaseClass: "phase-hold" },
-                { text: "Expire suavemente...", duration: 4000, phaseClass: "phase-exhale" },
-            ],
-            sleep: [
-                { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
-                { text: "Segure o ar...",       duration: 7000, phaseClass: "phase-hold" },
-                { text: "Expire suavemente...", duration: 8000, phaseClass: "phase-exhale" },
-            ],
-            box: [
-                { text: "Inspire...",           duration: 4000, phaseClass: "phase-inhale" },
-                { text: "Segure o ar...",       duration: 4000, phaseClass: "phase-hold" },
-                { text: "Expire...",            duration: 4000, phaseClass: "phase-exhale" },
-                { text: "Mantenha vazio...",    duration: 4000, phaseClass: "phase-hold-empty" }, 
-            ]
-        };
+    let breathingTimeout;
+    let isBreathing = false;
 
-        let currentCycle = breathingTechniques['calm'];
+    const breathingTechniques = {
+        calm: [
+            { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
+            { text: "Segure o ar...",       duration: 2000, phaseClass: "phase-hold" },
+            { text: "Expire suavemente...", duration: 4000, phaseClass: "phase-exhale" },
+        ],
+        sleep: [
+            { text: "Inspire lentamente...", duration: 4000, phaseClass: "phase-inhale" },
+            { text: "Segure o ar...",       duration: 7000, phaseClass: "phase-hold" },
+            { text: "Expire suavemente...", duration: 8000, phaseClass: "phase-exhale" },
+        ],
+        box: [
+            { text: "Inspire...",           duration: 4000, phaseClass: "phase-inhale" },
+            { text: "Segure o ar...",       duration: 4000, phaseClass: "phase-hold" },
+            { text: "Expire...",            duration: 4000, phaseClass: "phase-exhale" },
+            { text: "Mantenha vazio...",    duration: 4000, phaseClass: "phase-hold-empty" },
+        ]
+    };
 
-        techniqueSelect.addEventListener('change', (evento) => {
-            currentCycle = breathingTechniques[evento.target.value]; 
-            if(isBreathing) stopBreathing();
-        });
+    let currentCycle = breathingTechniques['calm'];
 
-        function startBreathing() {
-            if(isBreathing) return;
-            isBreathing = true;
-            
-            // Bloqueia os dois menus para evitar bugs durante a execução
-            techniqueSelect.disabled = true; 
-            techniqueSelect.classList.add('opacity-50', 'cursor-not-allowed');
-            timeSelect.disabled = true; 
-            timeSelect.classList.add('opacity-50', 'cursor-not-allowed');
-            
-            breathingBtn.innerHTML = `<span>⏹</span> Parar`;
-            breathingBtn.classList.remove('btn-primary');
-            breathingBtn.classList.add('btn-secondary');
+    techniqueSelect.addEventListener('change', (evento) => {
+        currentCycle = breathingTechniques[evento.target.value];
+        if(isBreathing) stopBreathing(false); // ATUALIZAÇÃO: Se trocar de técnica, para sem tocar o sino
+    });
 
-            // LÓGICA DO TIMER INVISÍVEL
-            const selectedTime = parseInt(timeSelect.value); // Pega os segundos escolhidos no menu
-            
-            if (selectedTime > 0) {
-                remainingSeconds = selectedTime;
+    function startBreathing() {
+        if(isBreathing) return;
+        isBreathing = true;
 
-                // Inicia o cronómetro que corre a cada 1000ms (1 segundo) em silêncio
-                countdownInterval = setInterval(() => {
-                    remainingSeconds--; // Tira 1 segundo da memória
+        techniqueSelect.disabled = true;
+        techniqueSelect.classList.add('opacity-50', 'cursor-not-allowed');
+        timeSelect.disabled = true;
+        timeSelect.classList.add('opacity-50', 'cursor-not-allowed');
 
-                    // Se chegar a zero, paramos a respiração automaticamente!
-                    if (remainingSeconds <= 0) {
-                        stopBreathing();
-                    }
-                }, 1000);
-            }
+        breathingBtn.innerHTML = `<span>⏹</span> Parar`;
+        breathingBtn.classList.remove('btn-primary');
+        breathingBtn.classList.add('btn-secondary');
 
-            let currentIndex = 0;
+        const selectedTime = parseInt(timeSelect.value);
 
-            function runStep() {
-                if(!isBreathing) return;
-
-                const step = currentCycle[currentIndex];
-
-                if (!isMuted) {
-                    chimeAudio.currentTime = 0; 
-                    chimeAudio.play().catch(e => console.log("Áudio bloqueado."));
+        if (selectedTime > 0) {
+            remainingSeconds = selectedTime;
+            countdownInterval = setInterval(() => {
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    // ATUALIZAÇÃO: Quando o tempo acaba, para e toca o sino
+                    stopBreathing(true);
                 }
-
-                breathingText.style.opacity = 0;
-                setTimeout(() => {
-                    breathingText.textContent = step.text;
-                    breathingText.style.opacity = 1;
-                }, 150);
-
-                circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
-                void circleInner.offsetWidth; 
-                circleInner.classList.add(step.phaseClass);
-
-                currentIndex = (currentIndex + 1) % currentCycle.length;
-                
-                breathingTimeout = setTimeout(runStep, step.duration);
-            }
-
-            runStep(); 
+            }, 1000);
         }
 
-        function stopBreathing() {
-            isBreathing = false;
-            clearTimeout(breathingTimeout);
-            
-            // Pára o relógio invisível se ele estiver a correr
-            clearInterval(countdownInterval);
-            
-            // Volta a ativar os menus
-            techniqueSelect.disabled = false;
-            techniqueSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            timeSelect.disabled = false;
-            timeSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            
-            breathingBtn.innerHTML = `<span>▶</span> Começar`;
-            breathingBtn.classList.remove('btn-secondary');
-            breathingBtn.classList.add('btn-primary');
-            
+        let currentIndex = 0;
+
+        function runStep() {
+            if(!isBreathing) return;
+
+            const step = currentCycle[currentIndex];
+
+            // ATUALIZAÇÃO: O código que tocava o sino a cada etapa foi REMOVIDO DAQUI
+
+            breathingText.style.opacity = 0;
+            setTimeout(() => {
+                breathingText.textContent = step.text;
+                breathingText.style.opacity = 1;
+            }, 150);
+
             circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
-            breathingText.textContent = "Pronto para recomeçar?";
-            breathingText.style.opacity = 1; 
+            void circleInner.offsetWidth;
+            circleInner.classList.add(step.phaseClass);
+
+            currentIndex = (currentIndex + 1) % currentCycle.length;
+
+            breathingTimeout = setTimeout(runStep, step.duration);
         }
 
-        breathingBtn.addEventListener('click', () => {
-            if (isBreathing) stopBreathing();
-            else startBreathing();
-        });
-    </script>
+        runStep();
+    }
+
+    // ATUALIZAÇÃO: A função agora aceita um parâmetro para saber se deve tocar o sino
+    function stopBreathing(playChime = false) {
+        isBreathing = false;
+        clearTimeout(breathingTimeout);
+        clearInterval(countdownInterval);
+
+        // ATUALIZAÇÃO: Se playChime for verdadeiro e não estiver mutado, toca o sino
+        if (playChime && !isMuted) {
+            chimeAudio.currentTime = 0;
+            chimeAudio.play().catch(e => console.log("Áudio bloqueado."));
+        }
+
+        techniqueSelect.disabled = false;
+        techniqueSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+        timeSelect.disabled = false;
+        timeSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        breathingBtn.innerHTML = `<span>▶</span> Começar`;
+        breathingBtn.classList.remove('btn-secondary');
+        breathingBtn.classList.add('btn-primary');
+
+        circleInner.classList.remove('phase-inhale', 'phase-hold', 'phase-exhale', 'phase-hold-empty');
+
+        // ATUALIZAÇÃO: Mensagem diferente dependendo de como parou
+        breathingText.textContent = playChime ? "Prática Concluída! 🧘" : "Pronto para recomeçar?";
+        breathingText.style.opacity = 1;
+    }
+
+    breathingBtn.addEventListener('click', () => {
+        // ATUALIZAÇÃO: Se o utilizador clicar em parar manualmente, para sem tocar o sino
+        if (isBreathing) stopBreathing(false);
+        else startBreathing();
+    });
+</script>
 </body>
 </html>
